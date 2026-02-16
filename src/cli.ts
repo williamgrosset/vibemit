@@ -2,6 +2,7 @@
 
 import { Command } from "commander";
 import { select } from "@inquirer/prompts";
+import { readFileSync } from "node:fs";
 import { getStagedDiff, getStagedStat, commit } from "./git.js";
 import { checkOllama, generateCommitMessages } from "./ollama.js";
 import { getRules, addRule, clearRules, getRulesPath } from "./config.js";
@@ -9,13 +10,14 @@ import { buildSystemPrompt, buildUserPrompt } from "./prompts.js";
 import { copyToClipboard } from "./clipboard.js";
 
 const DEFAULT_MODEL = "qwen3:8b";
+const CLI_VERSION = getCliVersion();
 
 const program = new Command();
 
 program
   .name("vibemit")
   .description("AI-generated Git commit messages using a local LLM via Ollama")
-  .version("0.1.0")
+  .version(CLI_VERSION)
   .option("--model <name>", "Ollama model to use", DEFAULT_MODEL)
   .option("--intent <text>", "high-priority commit intent guidance")
   .option("--conventional", "use Conventional Commit format")
@@ -229,4 +231,18 @@ function startGenerationProgress(): { stop: (message?: string) => void } {
       }
     },
   };
+}
+
+function getCliVersion(): string {
+  try {
+    const raw = readFileSync(new URL("../package.json", import.meta.url), "utf8");
+    const parsed = JSON.parse(raw) as { version?: unknown };
+    if (typeof parsed.version === "string") {
+      return parsed.version;
+    }
+  } catch {
+    // Fall back to an unknown version when package metadata is unavailable.
+  }
+
+  return "0.0.0";
 }
