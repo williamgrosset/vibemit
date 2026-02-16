@@ -1,6 +1,18 @@
 # vibemit
 
-AI-generated Git commit messages using a local LLM via [Ollama](https://ollama.com). Everything runs on your machine.
+[![Tests](https://github.com/williamgrosset/vibemit/actions/workflows/tests.yml/badge.svg)](https://github.com/williamgrosset/vibemit/actions/workflows/tests.yml)
+
+AI-generated Git commit messages using a local LLM via [Ollama](https://ollama.com).
+
+## How It Works
+
+1. Reads your staged diff via `git diff --staged`
+2. Sends the diff to a local Ollama model with a carefully tuned prompt
+3. Parses the response into 3 distinct commit message candidates
+4. Presents an interactive selection menu
+5. Commits with the selected message (or copies/prints based on flags)
+
+The model runs locally — no data leaves your machine.
 
 ## Prerequisites
 
@@ -39,7 +51,7 @@ git add -p
 vibemit
 ```
 
-vibemit reads your staged diff, generates 3 commit message candidates using a local LLM, and lets you pick one interactively.
+`vibemit` reads your staged diff, generates 3 commit message candidates using a local LLM, and lets you pick one interactively.
 
 ### Flags
 
@@ -116,16 +128,6 @@ vibemit --rules
 # Clear all rules
 vibemit --clear-rules
 ```
-
-## How It Works
-
-1. Reads your staged diff via `git diff --staged`
-2. Sends the diff to a local Ollama model with a carefully tuned prompt
-3. Parses the response into 3 distinct commit message candidates
-4. Presents an interactive selection menu
-5. Commits with the selected message (or copies/prints based on flags)
-
-The model runs locally — no data leaves your machine.
 
 ## Development
 
