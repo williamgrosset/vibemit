@@ -4,7 +4,7 @@ AI-generated Git commit messages using a local LLM via [Ollama](https://ollama.c
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org) >= 18
+- [Node.js](https://nodejs.org) >= 20
 - [Ollama](https://ollama.com) installed and running
 - A pulled model (default: `qwen3:8b`)
 
