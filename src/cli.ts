@@ -84,13 +84,26 @@ program.action(async (opts) => {
   const userPrompt = buildUserPrompt(diff, rules, body, intent, stat);
 
   console.log(`Using model: ${model}`);
-  console.log("Generating commit messages...\n");
 
-  const candidates = await generateCommitMessages(
-    systemPrompt,
-    userPrompt,
-    model,
-    body
+  const progress = startGenerationProgress();
+  let candidates: string[] = [];
+  let generated = false;
+  try {
+    candidates = await generateCommitMessages(
+      systemPrompt,
+      userPrompt,
+      model,
+      body
+    );
+    generated = true;
+  } finally {
+    if (!generated) {
+      progress.stop();
+    }
+  }
+
+  progress.stop(
+    `Generated ${candidates.length} commit message option${candidates.length === 1 ? "" : "s"}.`
   );
 
   let selected: string;
@@ -171,4 +184,49 @@ function formatForDisplay(message: string): string {
     return `${subject} (+${bodyLines.length} line${bodyLines.length > 1 ? "s" : ""})`;
   }
   return subject;
+}
+
+function startGenerationProgress(): { stop: (message?: string) => void } {
+  if (!process.stdout.isTTY) {
+    console.log("Generating commit messages...");
+    return {
+      stop: (message?: string) => {
+        if (message) {
+          console.log(message);
+        }
+      },
+    };
+  }
+
+  const frames = ["[=   ]", "[==  ]", "[=== ]", "[ ===]", "[  ==]", "[   =]"];
+  const phases = [
+    "Reading staged changes",
+    "Extracting the intent",
+    "Shaping candidate messages",
+    "Polishing final options",
+  ];
+
+  const startedAt = Date.now();
+  let frameIndex = 0;
+
+  const render = () => {
+    const elapsed = Math.max(1, Math.floor((Date.now() - startedAt) / 1000));
+    const phase = phases[Math.floor(frameIndex / 8) % phases.length];
+    const frame = frames[frameIndex % frames.length];
+    process.stdout.write(`\r${frame} ${phase} (${elapsed}s)`);
+    frameIndex++;
+  };
+
+  render();
+  const timer = setInterval(render, 120);
+
+  return {
+    stop: (message?: string) => {
+      clearInterval(timer);
+      process.stdout.write("\r\x1b[2K");
+      if (message) {
+        console.log(message);
+      }
+    },
+  };
 }
