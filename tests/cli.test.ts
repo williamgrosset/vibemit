@@ -1,6 +1,14 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { execSync } from "node:child_process";
-import { mkdtempSync, writeFileSync, readFileSync, rmSync, existsSync } from "node:fs";
+import {
+  mkdtempSync,
+  writeFileSync,
+  readFileSync,
+  rmSync,
+  existsSync,
+  mkdirSync,
+  chmodSync,
+} from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 
@@ -108,7 +116,19 @@ describe("CLI", () => {
     it("exits 1 with server-not-running error when there are staged changes", () => {
       stageFile(tempDir, "file.txt", "hello\n");
 
-      const result = runCLI("--yes", tempDir, { OLLAMA_HOST: "http://127.0.0.1:19999" });
+      const binDir = join(tempDir, "bin");
+      const fakeOllamaPath = join(binDir, "ollama");
+      mkdirSync(binDir);
+      writeFileSync(fakeOllamaPath, "#!/bin/sh\nexit 0\n", { encoding: "utf-8" });
+      chmodSync(fakeOllamaPath, 0o755);
+
+      const currentPath = process.env.PATH || "";
+      const pathWithFakeOllama = `${binDir}:${currentPath}`;
+
+      const result = runCLI("--yes", tempDir, {
+        OLLAMA_HOST: "http://127.0.0.1:19999",
+        PATH: pathWithFakeOllama,
+      });
       expect(result.exitCode).toBe(1);
       expect(result.stderr).toContain("not running");
     });
