@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build": "tsc && node scripts/postbuild.js",
+    "prepack": "npm run build",
     "dev": "tsc --watch",
     "test": "vitest run",
     "test:watch": "vitest"
@@ -31,7 +32,7 @@
   "author": "William Grosset",
   "repository": {
     "type": "git",
-    "url": "https://github.com/williamgrosset/vibemit"
+    "url": "git+https://github.com/williamgrosset/vibemit.git"
   },
   "dependencies": {
     "@inquirer/prompts": "^8.2.1",
