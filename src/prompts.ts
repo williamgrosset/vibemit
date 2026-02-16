@@ -12,7 +12,6 @@ export function buildSystemPrompt(opts: PromptOptions): string {
     "You are an expert software engineer writing high-quality Git commit messages.",
     "",
     "Rules:",
-    "- Use imperative tense (Add, Fix, Refactor, etc.).",
     "- Subject line must be <= 72 characters unless body is requested.",
     "- Be specific and concise.",
     "- Do not use quotes, backticks, markdown, numbering, or commentary.",
