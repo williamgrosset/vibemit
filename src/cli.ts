@@ -215,7 +215,7 @@ function startGenerationProgress(): { stop: (message?: string) => void } {
     const elapsed = Math.max(1, Math.floor((Date.now() - startedAt) / 1000));
     const phase = phases[Math.floor(frameIndex / 8) % phases.length];
     const frame = frames[frameIndex % frames.length];
-    process.stdout.write(`\r${frame} ${phase} (${elapsed}s)`);
+    process.stdout.write(`\r\x1b[2K${frame} ${phase} (${elapsed}s)`);
     frameIndex++;
   };
 
