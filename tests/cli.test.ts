@@ -84,6 +84,7 @@ describe("CLI", () => {
       expect(result.stdout).toContain("--intent");
       expect(result.stdout).toContain("--conventional");
       expect(result.stdout).toContain("--body");
+      expect(result.stdout).toContain("--max-diff-lines");
       expect(result.stdout).toContain("--dry-run");
       expect(result.stdout).toContain("--clipboard");
       expect(result.stdout).toContain("--yes");
@@ -98,6 +99,14 @@ describe("CLI", () => {
       const result = runCLI("--version", tempDir);
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toMatch(/^\d+\.\d+\.\d+$/);
+    });
+  });
+
+  describe("--max-diff-lines", () => {
+    it("rejects non-positive values", () => {
+      const result = runCLI("--max-diff-lines 0", tempDir);
+      expect(result.exitCode).toBe(1);
+      expect(result.stderr).toContain("must be a positive integer");
     });
   });
 

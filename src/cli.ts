@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-import { Command } from "commander";
+import { Command, InvalidArgumentError } from "commander";
 import { select } from "@inquirer/prompts";
 import { readFileSync } from "node:fs";
-import { getStagedDiff, getStagedStat, commit } from "./git.js";
+import { DEFAULT_MAX_DIFF_LINES, getStagedDiff, getStagedStat, commit } from "./git.js";
 import { checkOllama, generateCommitMessages } from "./ollama.js";
 import { getRules, addRule, clearRules, getRulesPath } from "./config.js";
 import { buildSystemPrompt, buildUserPrompt } from "./prompts.js";
@@ -22,6 +22,12 @@ program
   .option("--intent <text>", "high-priority commit intent guidance")
   .option("--conventional", "use Conventional Commit format")
   .option("--body", "include subject + body (1-3 bullets)")
+  .option(
+    "--max-diff-lines <number>",
+    "max staged diff lines sent to the model",
+    parsePositiveInteger,
+    DEFAULT_MAX_DIFF_LINES
+  )
   .option("-d, --dry-run", "print selected message without committing")
   .option("-c, --clipboard", "copy selected message to clipboard")
   .option("-y, --yes", "auto-select the first option (skip prompt)")
@@ -60,9 +66,10 @@ program.action(async (opts) => {
   }
 
   // Main flow: generate commit messages from staged changes.
+  const maxDiffLines: number = opts.maxDiffLines;
   let diff: string;
   try {
-    diff = getStagedDiff();
+    diff = getStagedDiff(maxDiffLines);
   } catch (err) {
     console.error(
       (err as Error).message || "No staged changes found."
@@ -245,4 +252,13 @@ function getCliVersion(): string {
   }
 
   return "0.0.0";
+}
+
+function parsePositiveInteger(value: string): number {
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isInteger(parsed) || parsed <= 0) {
+    throw new InvalidArgumentError("must be a positive integer");
+  }
+
+  return parsed;
 }

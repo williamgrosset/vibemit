@@ -1,6 +1,6 @@
 import { execSync } from "node:child_process";
 
-const MAX_DIFF_LINES = 500;
+export const DEFAULT_MAX_DIFF_LINES = 1500;
 
 /**
  * File basenames whose diffs are replaced with a short summary placeholder.
@@ -45,7 +45,7 @@ export function isGitRepo(): boolean {
  * Returns the staged diff as a string.
  * Throws if there are no staged changes.
  */
-export function getStagedDiff(): string {
+export function getStagedDiff(maxDiffLines = DEFAULT_MAX_DIFF_LINES): string {
   const diff = execSync("git diff --staged", {
     encoding: "utf-8",
     maxBuffer: 10 * 1024 * 1024, // 10 MB
@@ -57,7 +57,7 @@ export function getStagedDiff(): string {
     );
   }
 
-  return truncateDiff(summarizeNoisyFiles(diff));
+  return truncateDiff(summarizeNoisyFiles(diff), maxDiffLines);
 }
 
 /**
@@ -114,18 +114,19 @@ export function summarizeNoisyFiles(diff: string): string {
 }
 
 /**
- * Truncates a diff to MAX_DIFF_LINES lines to prevent overwhelming the LLM.
+ * Truncates a diff to maxDiffLines lines to prevent overwhelming the LLM.
  * Appends a notice when truncation occurs.
  */
-function truncateDiff(diff: string): string {
+function truncateDiff(diff: string, maxDiffLines: number): string {
+  const safeMaxDiffLines = Math.max(1, Math.trunc(maxDiffLines));
   const lines = diff.split("\n");
-  if (lines.length <= MAX_DIFF_LINES) {
+  if (lines.length <= safeMaxDiffLines) {
     return diff;
   }
 
   return (
-    lines.slice(0, MAX_DIFF_LINES).join("\n") +
-    `\n\n[Diff truncated: showing ${MAX_DIFF_LINES} of ${lines.length} lines]`
+    lines.slice(0, safeMaxDiffLines).join("\n") +
+    `\n\n[Diff truncated: showing ${safeMaxDiffLines} of ${lines.length} lines]`
   );
 }
 

@@ -131,6 +131,20 @@ describe("git", () => {
       expect(result.stdout).toContain("THREW:");
       expect(result.stdout).toContain("No staged changes");
     });
+
+    it("respects custom max diff line limits", () => {
+      const lines = Array.from({ length: 30 }, (_, i) => `line-${i + 1}`).join("\n") + "\n";
+      writeFileSync(join(tempDir, "large.txt"), lines);
+      execSync("git add large.txt", { cwd: tempDir, stdio: "pipe" });
+
+      const result = runInDir(tempDir, `
+        const diff = getStagedDiff(10);
+        process.stdout.write(diff);
+      `);
+
+      expect(result.exitCode).toBe(0);
+      expect(result.stdout).toContain("[Diff truncated: showing 10 of");
+    });
   });
 
   describe("commit", () => {

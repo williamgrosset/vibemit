@@ -61,6 +61,7 @@ vibemit
 | `--intent <text>` | | High-priority intent guidance for commit wording |
 | `--conventional` | | Conventional Commit format (`type(scope): subject`) |
 | `--body` | | Include subject + body (1-3 bullet points) |
+| `--max-diff-lines <number>` | | Max staged diff lines sent to model (default: `1500`) |
 | `--dry-run` | `-d` | Print selected message, do not commit |
 | `--clipboard` | `-c` | Copy selected message to clipboard, do not commit |
 | `--yes` | `-y` | Auto-select the first option (skip prompt) |
@@ -85,6 +86,9 @@ vibemit -y
 
 # Use a different model
 vibemit --model llama3.2:3b
+
+# Increase diff context for large commits
+vibemit --max-diff-lines 2500
 
 # Provide explicit commit intent
 vibemit --intent "Initial scaffold for vibemit CLI with Ollama integration"
