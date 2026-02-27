@@ -1,6 +1,6 @@
 {
   "name": "vibemit",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "AI-generated Git commit messages using a local LLM via Ollama",
   "type": "module",
   "bin": {
